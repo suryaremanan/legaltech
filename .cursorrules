@@ -1,0 +1,96 @@
+title: "Automated Legal Document Context Extraction & Chatbot Query System"
+description: >
+  This rule automates the extraction of context from labelled legal templates,
+  builds a structured, queryable database, and integrates a chatbot for client-specific queries.
+version: "1.0"
+author: "Surya Remanan"
+date: "2025-02-20"
+---
+
+# Workflow Rule: Legal Tech Data Processing & Chatbot Integration
+
+## Objective
+Automate the manual task of labelling legal documents by:
+- Scanning client folders containing labelled templates.
+- Extracting context using LLaMa2.
+- Transforming the data into a structured database.
+- Integrating a chatbot for precise, context-aware query responses.
+
+## Steps
+
+### 1. Data Ingestion & Folder Scanning
+- **Description:**  
+  Scan a predefined directory structure where each client has a dedicated folder containing document templates.
+- **Actions:**  
+  - Identify each client folder.
+  - Locate templates based on file patterns or metadata.
+  - Read and extract raw content from labelled sections.
+- **Expected Output:**  
+  Raw text data with associated labels ready for processing.
+
+### 2. Preprocessing & Context Extraction
+- **Description:**  
+  Clean and normalize the extracted text and use an open source LLM to interpret the legal context.
+- **Actions:**  
+  - Remove noise, standardize formatting, and validate labels.
+  - Use LLaMa2 to identify and extract context, mapping unstructured text to structured fields.
+- **Expected Output:**  
+  Structured data segments with context annotations for each labelled field.
+
+### 3. Database Preparation & Structuring
+- **Description:**  
+  Transform the structured data into a database schema that supports efficient querying.
+- **Actions:**  
+  - Define the database schema (SQL/NoSQL) based on the extracted fields.
+  - Insert processed data into the database.
+  - Create semantic indexes (e.g., using vector embeddings) for context-based retrieval.
+- **Expected Output:**  
+  A fully populated and queryable database containing client-specific legal data.
+
+### 4. Chatbot Integration
+- **Description:**  
+  Build a chatbot interface that leverages the LLM and the prepared database to deliver precise answers.
+- **Actions:**  
+  - Develop a chatbot frontend for client interaction.
+  - Integrate the chatbot with the database and LLM to interpret queries in context.
+  - Ensure responses are generated using the client's specific data.
+- **Expected Output:**  
+  A working chatbot that provides accurate, context-aware legal data responses.
+
+### 5. Error Handling & Continuous Improvement
+- **Description:**  
+  Implement mechanisms to minimize errors and continuously improve the system.
+- **Actions:**  
+  - Log errors and track performance metrics.
+  - Provide a feedback loop for clients to report inaccuracies.
+  - Schedule periodic retraining or updates for the LLM based on feedback.
+- **Expected Output:**  
+  A robust system that learns from errors and reduces manual intervention over time.
+
+## Configuration Parameters
+- **CLIENT_FOLDER_PATH:** Path to the root directory containing client folders.
+- **TEMPLATE_FILE_PATTERN:** File naming or pattern rules for locating labelled templates.
+- **LLM_MODEL:** Identifier or path for the open source LLM used for context extraction.
+- **DATABASE_CONFIG:** Connection details and schema definitions for the target database.
+- **CHATBOT_FRAMEWORK:** Integration details for the chatbot interface (API endpoints, libraries, etc.).
+
+## Execution & Triggers
+- **Automatic Trigger:**  
+  - When a new client folder is added.
+  - On a scheduled run (e.g., nightly batch processing).
+- **Manual Trigger:**  
+  - Via a dedicated command or button in the IDE.
+- **Logging & Monitoring:**  
+  - Log every processing step with timestamps.
+  - Monitor system performance and error logs for debugging.
+
+## Testing & Validation
+- **Unit Tests:**  
+  - Validate file scanning and text extraction.
+  - Test LLM output for context accuracy.
+  - Verify database insertion and query responses.
+- **Integration Tests:**  
+  - Ensure end-to-end processing from file ingestion to chatbot response.
+  - Simulate client queries to confirm context-specific answers.
+
+---
