@@ -1,96 +1,101 @@
-title: "Automated Legal Document Context Extraction & Chatbot Query System"
+title: "Automated Legal Document Context Extraction & Chatbot Query System with Miistral LLM RAG and Faiss"
 description: >
-  This rule automates the extraction of context from labelled legal templates,
-  builds a structured, queryable database, and integrates a chatbot for client-specific queries.
-version: "1.0"
+  This rule automates the extraction of context from labelled legal templates, indexes legal documents using an open source vector database (Faiss),
+  and fine-tunes the Miistral LLM on the PDF data stored in each client's folder using a Retrieval-Augmented Generation (RAG) application.
+  It also integrates a chatbot that leverages the fine-tuned LLM for precise, context-aware query responses, and supports generating an English preview and summary
+  when a client's PDF document folder is selected.
+version: "1.2"
 author: "Surya Remanan"
-date: "2025-02-20"
+date: "2025-02-25"
 ---
 
-# Workflow Rule: Legal Tech Data Processing & Chatbot Integration
+# Workflow Rule: Legal Tech Data Processing, RAG Chatbot & PDF Preview Integration with Faiss
 
 ## Objective
 Automate the manual task of labelling legal documents by:
-- Scanning client folders containing labelled templates.
-- Extracting context using LLaMa2.
-- Transforming the data into a structured database.
-- Integrating a chatbot for precise, context-aware query responses.
+- Scanning client folders containing labelled templates and PDFs.
+- Extracting context using Miistral LLM with a RAG pipeline.
+- Indexing documents in an open source vector database (Faiss) for efficient, context-aware retrieval.
+- Fine-tuning the Miistral LLM on the PDF data stored in each client's folder.
+- Integrating a chatbot for precise, client-specific query responses based on each client's data.
+- Generating an English preview and summary when a client's PDF folder is selected.
 
 ## Steps
 
 ### 1. Data Ingestion & Folder Scanning
 - **Description:**  
-  Scan a predefined directory structure where each client has a dedicated folder containing document templates.
+  Scan a predefined root directory where each client has a dedicated folder containing document templates and PDFs.
 - **Actions:**  
-  - Identify each client folder.
-  - Locate templates based on file patterns or metadata.
-  - Read and extract raw content from labelled sections.
+  - Identify each client folder within the legal directory.
+  - Locate and read templates and PDF files.
+  - Extract raw text from labelled sections and from PDFs (using OCR if needed).
 - **Expected Output:**  
-  Raw text data with associated labels ready for processing.
+  Raw text data with labels, ready for processing.
 
 ### 2. Preprocessing & Context Extraction
 - **Description:**  
-  Clean and normalize the extracted text and use an open source LLM to interpret the legal context.
+  Clean and normalize the extracted text and use the Miistral LLM (via a RAG pipeline) to extract and annotate legal context.
 - **Actions:**  
-  - Remove noise, standardize formatting, and validate labels.
-  - Use LLaMa2 to identify and extract context, mapping unstructured text to structured fields.
+  - Remove noise and standardize formatting.
+  - Generate concise summaries (in 3-4 sentences) for each PDF.
 - **Expected Output:**  
-  Structured data segments with context annotations for each labelled field.
+  Structured context data and summaries for each document.
 
-### 3. Database Preparation & Structuring
+### 3. Indexing with Faiss
 - **Description:**  
-  Transform the structured data into a database schema that supports efficient querying.
+  Transform the extracted document text into vector embeddings and index them using FAISS.
 - **Actions:**  
-  - Define the database schema (SQL/NoSQL) based on the extracted fields.
-  - Insert processed data into the database.
-  - Create semantic indexes (e.g., using vector embeddings) for context-based retrieval.
+  - Compute 384-dimensional embeddings for each document using SentenceTransformer.
+  - Normalize embeddings to unit length (to approximate cosine similarity using inner product).
+  - Insert embeddings along with document metadata (filename, summary, etc.) into an in‑memory FAISS index dedicated to each client folder.
 - **Expected Output:**  
-  A fully populated and queryable database containing client-specific legal data.
+  A FAISS index per client folder enabling fast, context-based retrieval.
 
-### 4. Chatbot Integration
+### 4. Fine-tuning & Chatbot Integration
 - **Description:**  
-  Build a chatbot interface that leverages the LLM and the prepared database to deliver precise answers.
+  Fine-tune the Miistral LLM on client-specific PDF data and integrate a chatbot for precise query responses.
 - **Actions:**  
-  - Develop a chatbot frontend for client interaction.
-  - Integrate the chatbot with the database and LLM to interpret queries in context.
-  - Ensure responses are generated using the client's specific data.
+  - Fine-tune the base Miistral LLM with the extracted, annotated legal data from each client's PDFs.
+  - Develop a chatbot interface that:
+    - Embeds user queries.
+    - Searches the corresponding FAISS index for the most relevant documents.
+    - Combines the retrieved context with the original query.
+    - Uses the fine-tuned LLM to generate a precise response.
 - **Expected Output:**  
-  A working chatbot that provides accurate, context-aware legal data responses.
+  A chatbot that delivers context-aware legal responses based on client-specific data.
 
 ### 5. Error Handling & Continuous Improvement
 - **Description:**  
-  Implement mechanisms to minimize errors and continuously improve the system.
+  Implement robust logging and feedback mechanisms to handle errors and continuously improve the system.
 - **Actions:**  
-  - Log errors and track performance metrics.
-  - Provide a feedback loop for clients to report inaccuracies.
-  - Schedule periodic retraining or updates for the LLM based on feedback.
+  - Log processing steps, errors, and performance metrics.
+  - Establish a feedback loop for clients to report inaccuracies.
+  - Schedule periodic re-training of the LLM based on updated data and feedback.
 - **Expected Output:**  
-  A robust system that learns from errors and reduces manual intervention over time.
+  A resilient, self-improving system that minimizes manual intervention.
 
 ## Configuration Parameters
-- **CLIENT_FOLDER_PATH:** Path to the root directory containing client folders.
-- **TEMPLATE_FILE_PATTERN:** File naming or pattern rules for locating labelled templates.
-- **LLM_MODEL:** Identifier or path for the open source LLM used for context extraction.
-- **DATABASE_CONFIG:** Connection details and schema definitions for the target database.
+- **LEGAL_DIR:** Path to the root directory containing client folders.
+- **FAISS_INDEX_CONFIG:** Parameters for the FAISS index (e.g., dimension = 384, similarity metric = cosine via inner product).
+- **LLM_MODEL:** Identifier or path for the base Miistral LLM.
+- **FINETUNE_CONFIG:** Training parameters (learning rate, epochs, etc.) for fine-tuning the LLM on client-specific data.
 - **CHATBOT_FRAMEWORK:** Integration details for the chatbot interface (API endpoints, libraries, etc.).
+- **PREVIEW_SUMMARY_ENABLED:** Boolean flag to enable PDF preview and summary generation.
 
 ## Execution & Triggers
 - **Automatic Trigger:**  
-  - When a new client folder is added.
+  - When a new client folder or document is added.
   - On a scheduled run (e.g., nightly batch processing).
 - **Manual Trigger:**  
   - Via a dedicated command or button in the IDE.
 - **Logging & Monitoring:**  
   - Log every processing step with timestamps.
-  - Monitor system performance and error logs for debugging.
+  - Monitor performance and error logs for continuous improvements.
 
 ## Testing & Validation
 - **Unit Tests:**  
-  - Validate file scanning and text extraction.
-  - Test LLM output for context accuracy.
-  - Verify database insertion and query responses.
+  - Validate folder scanning, text extraction, and vector embedding.
+  - Test context extraction and summary generation.
 - **Integration Tests:**  
-  - Ensure end-to-end processing from file ingestion to chatbot response.
-  - Simulate client queries to confirm context-specific answers.
-
----
+  - Confirm end-to-end processing from file ingestion to chatbot response.
+  - Simulate client queries to verify accurate, context-specific answers.
